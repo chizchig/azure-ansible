@@ -58,6 +58,17 @@ jobs:
             Remove-Item -Force .\tfplan
         }
       continue-on-error: true  # Continue with the workflow even if cleanup fails
+    
     - name: Destroy Terraform configuration (if deploy was successful)
-      if: ${{ steps.deploy.conclusion == 'success' }}
-      run: terraform destroy -auto-approve
+      if: ${{ success() }}
+      run: |
+        # Ensure we have the latest state before destroying
+        terraform refresh
+
+        # Destroy the infrastructure
+        terraform destroy -auto-approve
+
+        # Remove .terraform directory if it exists after destroy
+        if (Test-Path .\.terraform) {
+            Remove-Item -Recurse -Force .\.terraform
+        }
