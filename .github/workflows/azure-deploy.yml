@@ -58,3 +58,6 @@ jobs:
             Remove-Item -Force .\tfplan
         }
       continue-on-error: true  # Continue with the workflow even if cleanup fails
+    - name: Destroy Terraform configuration (if deploy was successful)
+      if: ${{ steps.deploy.conclusion == 'success' }}
+      run: terraform destroy -auto-approve
